@@ -106,6 +106,7 @@ namespace FolderPreset
 			new PresetDirectory( "AnimatorControllers", false),
 			new PresetDirectory( "Animations", false),
 			new PresetDirectory( "Materials", true),
+			new PresetDirectory( "Models", false),
 			new PresetDirectory( "Textures", true),
 			new PresetDirectory( "Prefabs", true),
 			new PresetDirectory( "Scripts", false),
