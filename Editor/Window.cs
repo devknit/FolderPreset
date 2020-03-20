@@ -16,10 +16,36 @@ namespace FolderPreset
 				activeWindow = null;
 			}
 			activeWindow = ScriptableObject.CreateInstance<Window>();
+			activeWindow.titleContent = new GUIContent( "Folder Preset");
 			activeWindow.ShowUtility();
 		}
 		void OnEnable()
 		{
+			Undo.undoRedoPerformed += Repaint;
+			
+			if( presets == null)
+			{
+				string[] paths = AssetDatabase.FindAssets( kSettingsFileName);
+				for( int i0 = 0; i0 < paths.Length; ++i0)
+				{
+					presets = AssetDatabase.LoadAssetAtPath<PresetDirectories>( 
+						AssetDatabase.GUIDToAssetPath( paths[ i0])) as PresetDirectories;
+					if( (presets?.IsValid() ?? false) != false)
+					{
+						break;
+					}
+				}
+			}
+			if( presets == null)
+			{
+				presets = ScriptableObject.CreateInstance<PresetDirectories>();
+				string path = AssetDatabase.GetAssetPath( MonoScript.FromScriptableObject( presets));
+				path = path.Substring( 0, path.LastIndexOf( "/"));
+				AssetDatabase.CreateAsset( presets, path + "/" + kSettingsFileName + ".asset");
+				AssetDatabase.SaveAssets();
+			}
+			presets.Verify();
+			
 			if( current == null)
 			{
 				if( Selection.activeObject != null)
@@ -43,6 +69,10 @@ namespace FolderPreset
 				}
 			}
 		}
+		void OnDisable()
+		{
+			Undo.undoRedoPerformed -= Repaint;
+		}
 		void OnDestroy()
 		{
 			if( activeWindow != null)
@@ -52,71 +82,32 @@ namespace FolderPreset
 		}
 		void OnGUI()
 		{
-			EditorGUI.BeginDisabledGroup( true);
-			EditorGUILayout.TextField( current);
-			EditorGUI.EndDisabledGroup();
-			
-			for( int i0 = 0; i0 < directories.Length; ++i0)
+			scrollPosition = EditorGUILayout.BeginScrollView( scrollPosition);
 			{
-				PresetDirectory directory = directories[ i0];
+				EditorGUI.BeginDisabledGroup( true);
+				EditorGUILayout.TextField( current);
+				EditorGUI.EndDisabledGroup();
 				
-				bool newEnabled = EditorGUILayout.Toggle( 
-					((i0 == directories.Length - 1)? "└─" : "├─") + 
-					directory.name, directory.enabled);
-				if( directory.enabled != newEnabled)
+				presets.OnGUI();
+				
+				if( GUILayout.Button( "Create") != false)
 				{
-					Undo.RecordObject( this, "Change Enabled");
-					directory.enabled = newEnabled;
+					presets.CreateDirectories( current);
+					Close();
 				}
 			}
-			if( GUILayout.Button( "Create") != false)
-			{
-				for( int i0 = 0; i0 < directories.Length; ++i0)
-				{
-					PresetDirectory directory = directories[ i0];
-					
-					if( directory.enabled != false)
-					{
-						CreateDirectory( current + "/" + directory.name);
-					}
-				}
-				Close();
-			}
+			EditorGUILayout.EndScrollView();
 		}
-		static void CreateDirectory( string path)
-		{
-			if( Directory.Exists( path) == false)
-			{
-				Directory.CreateDirectory( path);
-				AssetDatabase.ImportAsset( path);
-			}
-		}
-		internal class PresetDirectory
-		{
-			public PresetDirectory( string name, bool enabled)
-			{
-				this.name = name;
-				this.enabled = enabled;
-			}
-			internal string name;
-			internal bool enabled;
-		}
-		static PresetDirectory[] directories = new PresetDirectory[]
-		{
-			new PresetDirectory( "AnimatorControllers", false),
-			new PresetDirectory( "Animations", false),
-			new PresetDirectory( "Materials", true),
-			new PresetDirectory( "Models", false),
-			new PresetDirectory( "Textures", true),
-			new PresetDirectory( "Prefabs", true),
-			new PresetDirectory( "Scripts", false),
-			new PresetDirectory( "Scenes", false),
-			new PresetDirectory( "Shaders", false),
-		};
+		const string kSettingsFileName = "FolderPresets";
+		
 		static Window activeWindow = null;
 		
 		[SerializeField]
 		string current;
+		[SerializeField]
+		Vector2 scrollPosition;
+		[SerializeField]
+		PresetDirectories presets;
 	}
 }
 
