@@ -30,7 +30,7 @@ namespace FolderPreset
 		}
 		public void Verify()
 		{
-			
+			System.Array.Sort( directories, new ElementComparer());
 		}
 		public float GetHeight()
 		{
@@ -85,13 +85,23 @@ namespace FolderPreset
 			internal string name;
 			[SerializeField]
 			internal bool enabled;
-		
 		}
-		class ElementComparer: IComparer
+		class ElementComparer: NaturalSortOrder.Comparer
 		{
-			public int Compare( object x, object y)
+			public override int Compare( object x, object y)
 			{
+				string src1 = null;
+				string src2 = null;
 				
+				if( x is Element element1)
+				{
+					src1 = element1.name;
+				}
+				if( y is Element element2)
+				{
+					src2 = element2.name;
+				}
+				return InternalCompare( src1, src2);
 			}
 		}
 		
