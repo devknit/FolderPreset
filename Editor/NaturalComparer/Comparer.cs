@@ -105,7 +105,7 @@ namespace NaturalSortOrder
 					long v1 = 0;
 					long v2 = 0;
 					
-					bool success = GetNumber( s1, t1, ref i1, out v1) && GetNumber( s2, t2, ref i2, out v2);
+					bool success = (GetNumber( s1, t1, ref i1, out v1) != false) && (GetNumber( s2, t2, ref i2, out v2) != false);
 					if( success != false)
                     {
                         if( v1 < v2)
@@ -559,7 +559,6 @@ namespace NaturalSortOrder
             }
             return StringComparer.CurrentCulture.Compare( c1.ToString(), c2.ToString());
         }
-
 		static bool GetNumber( string source, CharTypes type, ref int pos, out long value)
 		{
 			INumberComverter number = null;

@@ -31,21 +31,21 @@ namespace NaturalSortOrder
 
 		/**
 		 * \brief 数字を追加します
-		 * \param number [in] 数字を表す
+		 * \param source [in] 数字を表す
 		 * \return 追加結果。以下の値が返ります。
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		bool AddChar( char number);
+		bool AddChar( char value);
 	}
 	/**
 	 * \brief アラビア数字を数値へ変換
 	 */
 	internal class NumberConverter : INumberComverter
 	{
-		public NumberConverter( char number)
+		public NumberConverter( char source)
 		{
-			if( number >= '0' && number <= '9')
+			if( source >= '0' && source <= '9')
 			{
 				numberZero = '0';
 				numberNine = '9';
@@ -57,7 +57,7 @@ namespace NaturalSortOrder
 			}
 
 			length = 1;
-			value = number - numberZero;
+			value = source - numberZero;
 			isComma = false;
 		}
 
@@ -83,10 +83,10 @@ namespace NaturalSortOrder
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		public bool AddChar( char number)
+		public bool AddChar( char source)
 		{
 			/* 1文字目の数字と同種のアラビア数字かどうか */
-			if (number >= numberZero && number <= numberNine)
+			if (source >= numberZero && source <= numberNine)
 			{
 				if( isComma != false)
 				{
@@ -102,10 +102,10 @@ namespace NaturalSortOrder
 				{
 					++numberCount;
 				}
-				value = value * 10 + (number - numberZero);
+				value = value * 10 + (source - numberZero);
 			}
 			/* 3桁区切りのカンマかどうか */
-			else if( numberZero - number == 4)
+			else if( numberZero - source == 4)
 			{
 				if( isComma == false && numberCount > 3)
 				{
@@ -138,31 +138,33 @@ namespace NaturalSortOrder
 		/*!> カンマ区切り以降のアラビア数字の文字数を表す */
 		int commaLength;
 	}
-	/// <summary>英字表現のローマ数字を数値へ変換する機能を提供します。</summary>
-	/// <remarks>大文字と小文字、ASCIIと日本語の混在は許しません。</remarks>
+	/**
+	 * \brief 英字表現のローマ数字を数値へ変換する\n
+	 *        大文字と小文字、ASCIIと日本語の混在は許容しない
+	 */
 	class RomanNumberConverter : INumberComverter
 	{
-		public RomanNumberConverter( char alpha)
+		public RomanNumberConverter( char source)
 		{
-			if( alpha >= 'A' && alpha <= 'Z')
+			if( source >= 'A' && source <= 'Z')
 			{
 				alphaA = 'A';
 			}
-			else if( alpha >= 'a' && alpha <= 'z')
+			else if( source >= 'a' && source <= 'z')
 			{
 				alphaA = 'a';
 			}
-			else if( alpha >= 'Ａ' && alpha <= 'Ｚ')
+			else if( source >= 'Ａ' && source <= 'Ｚ')
 			{
 				alphaA = 'Ａ';
 			}
-			else if( alpha >= 'ａ' && alpha <= 'ｚ')
+			else if( source >= 'ａ' && source <= 'ｚ')
 			{
 				alphaA = 'ａ';
 			}
 
 			length = 1;
-			number = Parse( alpha);
+			number = Parse( source);
 			max = number;
 		}
 		/*!> エラーが発生したかどうかを取得します */
@@ -182,60 +184,60 @@ namespace NaturalSortOrder
 		}
 		/**
 		 * \brief 数字を追加します
-		 * \param roman [in] 数字を表す
+		 * \param source [in] 数字を表す
 		 * \return 追加結果。以下の値が返ります。
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		public bool AddChar( char roman)
+		public bool AddChar( char source)
 		{
-			long value = Parse( roman);
+			long parseValue = Parse( source);
 
 			/* ローマ数字以外の文字が見つかったら終了 */
-			if( value == 0)
+			if( parseValue == 0)
 			{
-				isError = IsAlpha( roman);
+				isError = IsAlpha( source);
 				return false;
 			}
 			/* IV IX などの減算則表記 */
-			else if( value > max)
+			else if( parseValue > max)
 			{
-				long mag = value / max;
+				long mag = parseValue / max;
 				if( mag == 5 || mag == 10)
 				{
-					value += value - number;
+					value += parseValue - number;
 					number = 0;
 					max = max / 2;
 				}
 				else
 				{
-					isError = IsAlpha( roman);
+					isError = IsAlpha( source);
 					return false;
 				}
 			}
 			/* VI XI など加算則表記 */
-			else if( value < max)
+			else if( parseValue < max)
 			{
 				value += number;
-				number = value;
-				max = value;
+				number = parseValue;
+				max = parseValue;
 			}
 			/* II XX など同じ数字の繰り返し */
 			else
 			{
-				number += value;
+				number += parseValue;
 			}
 			length++;
 			return true;
 		}
 		/**
 		 * \brief ローマ数字を数値へ変換します
-		 * \param alpha [in] ローマ数字
+		 * \param source [in] ローマ数字
 		 * \return ローマ数字が示す値が返ります。
 		 */
-		protected long Parse( char alpha)
+		protected long Parse( char source)
 		{
-			switch( alpha - alphaA)
+			switch( source - alphaA)
 			{
 				case 08: return 1;		/* I */
 				case 21: return 5;		/* V */
@@ -249,56 +251,58 @@ namespace NaturalSortOrder
 		}
 		/**
 		 * \brief 指定の文字が英字かどうかを判定する
-		 * \param alpha [in] 検査対象の文字
+		 * \param source [in] 検査対象の文字
 		 * \return 判定結果。以下の値が返ります。
 		 * \retval true 指定の文字が英字だった場合に返ります。
 		 * \retval false 指定の文字が英字ではない場合に返ります。
 		 */
-		protected bool IsAlpha( char alpha)
+		protected bool IsAlpha( char source)
 		{
-			return ((alpha >= 'A' && alpha <= 'Z') || (alpha >= 'a' && alpha <= 'z') || (alpha >= 'Ａ' && alpha <= 'Ｚ') || (alpha >= 'ａ' && alpha <= 'ｚ'));
+			return ((source >= 'A' && source <= 'Z') || (source >= 'a' && source <= 'z') || (source >= 'Ａ' && source <= 'Ｚ') || (source >= 'ａ' && source <= 'ｚ'));
 		}
 
-		/*!>数値全体の長さを表す int */
+		/*!>数値全体の長さを表す */
 		int length;
-		/*!>アルファベットの A を表す char */
+		/*!>アルファベットの A を表す */
 		char alphaA;
-		/*!>未確定の数字を表す long */
+		/*!>未確定の数字を表す */
 		long number;
-		/*!>変換結果の数値を表す long */
+		/*!>変換結果の数値を表す */
 		long value;
-		/*!>現在単位を表す long */
+		/*!>現在単位を表す */
 		long max;
-		/*!>エラーが発生したかどうかを表す bool */
+		/*!>エラーが発生したかどうかを表す */
 		bool isError;
 	}
-	/// <summary>全角ローマ数字を数値へ変換する機能を提供します。</summary>
+	/**
+	 * \brief 全角ローマ数字を数値へ変換する
+	 */
 	class JpRomanNumberConverter : INumberComverter
 	{
-		public JpRomanNumberConverter( char roman)
+		public JpRomanNumberConverter( char source)
 		{
 			length = 1;
 
 			/* 全角ローマ数字(Ⅰ～XII,L,C,D,M) */
-			if( roman >= 0x2160 && roman <= 0x216F)
+			if( source >= 0x2160 && source <= 0x216F)
 			{
 				romanOne = (char)0x2160;
 			}
 			/* 全角ローマ数字(ⅰ～xii,l,c,d,m) */
-			else if( roman >= 0x2170 && roman <= 0x217F)
+			else if( source >= 0x2170 && source <= 0x217F)
 			{
 				romanOne = (char)0x2170;
 			}
 
-			long value = Parse( roman);
-			if( value == 0)
+			long parseValue = Parse( source);
+			if( parseValue == 0)
 			{
-				value = roman - romanOne + 1;
+				value = source - romanOne + 1;
 				isMultiChar = false;
 			}
 			else
 			{
-				number = value;
+				number = parseValue;
 				max = number;
 				isMultiChar = true;
 			}
@@ -321,32 +325,32 @@ namespace NaturalSortOrder
 		}
 		/**
 		 * \brief 数字を追加します
-		 * \param roman [in] 数字を表す
+		 * \param source [in] 数字を表す
 		 * \return 追加結果。以下の値が返ります。
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		public bool AddChar( char roman)
+		public bool AddChar( char source)
 		{
 			if( isMultiChar == false)
 			{
 				return false;
 			}
 
-			long value = Parse( roman);
+			long parseValue = Parse( source);
 
 			/* ローマ数字以外の文字が見つかったら終了 */
-			if( value == 0)
+			if( parseValue == 0)
 			{
 				return false;
 			}
 			/* IV IX などの減算則表記 */
-			else if( value > max)
+			else if( parseValue > max)
 			{
-				long mag = value / max;
+				long mag = parseValue / max;
 				if( mag == 5 || mag == 10)
 				{
-					value += value - number;
+					value += parseValue - number;
 					number = 0;
 					max = max / 2;
 				}
@@ -356,16 +360,16 @@ namespace NaturalSortOrder
 				}
 			}
 			/* VI XI など加算則表記 */
-			else if( value < max)
+			else if( parseValue < max)
 			{
 				value += number;
-				number = value;
-				max = value;
+				number = parseValue;
+				max = parseValue;
 			}
 			/* II XX など同じ数字の繰り返し */
 			else
 			{
-				number += value;
+				number += parseValue;
 			}
 
 			length++;
@@ -376,9 +380,9 @@ namespace NaturalSortOrder
 		 * \param alpha [in] ローマ数字
 		 * \return ローマ数字が示す値が返ります。
 		 */
-		protected long Parse( char roman)
+		protected long Parse( char source)
 		{
-			switch( roman - romanOne)
+			switch( source - romanOne)
 			{
 				case 0x0: return 1; 	/* I */
 				case 0x4: return 5; 	/* V */
@@ -404,40 +408,42 @@ namespace NaturalSortOrder
 		/*!> 現在単位を表す long */
 		long max;
 	}
-	/// <summary>丸数字を数値へ変換する機能を提供します。</summary>
+	/**
+	 * \brief 丸数字を数値へ変換する
+	 */
 	class CircleNumberConverter : INumberComverter
 	{
-		public CircleNumberConverter( char number)
+		public CircleNumberConverter( char source)
 		{
 			/* ①～⑳ */
-			if( number >= 0x2460 && number <= 0x2473)
+			if( source >= 0x2460 && source <= 0x2473)
 			{
-				this.number = number - 0x2460 + 1;
+				number = source - 0x2460 + 1;
 			}
 			/* (1)～(12) */
-			else if( number >= 0x2474 && number <= 0x2487)
+			else if( source >= 0x2474 && source <= 0x2487)
 			{
-				this.number = number - 0x2474 + 1;
+				number = source - 0x2474 + 1;
 			}
 			/* 1.～20. */
-			else if( number >= 0x2488 && number <= 0x249B)
+			else if( source >= 0x2488 && source <= 0x249B)
 			{
-				this.number = number - 0x2488 + 1;
+				number = source - 0x2488 + 1;
 			}
 			/* 丸付き21～35 */
-			else if( number >= 0x3251 && number <= 0x325F)
+			else if( source >= 0x3251 && source <= 0x325F)
 			{
-				this.number = number - 0x3251 + 21;
+				number = source - 0x3251 + 21;
 			}
 			/* {一}～{十} */
-			else if( number >= 0x3220 && number <= 0x3229)
+			else if( source >= 0x3220 && source <= 0x3229)
 			{
-				this.number = number - 0x3220 + 1;
+				number = source - 0x3220 + 1;
 			}
 			/* 丸付き一～十 */
-			else if( number >= 0x3280 && number <= 0x3289)
+			else if( source >= 0x3280 && source <= 0x3289)
 			{
-				this.number = number - 0x3280 + 1;
+				number = source - 0x3280 + 1;
 			}
 		}
 		/*!> エラーが発生したかどうかを取得します */
@@ -457,12 +463,12 @@ namespace NaturalSortOrder
 		}
 		/**
 		 * \brief 数字を追加します
-		 * \param number [in] 数字を表す
+		 * \param source [in] 数字を表す
 		 * \return 追加結果。以下の値が返ります。
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		public bool AddChar( char number)
+		public bool AddChar( char source)
 		{
 			return false;
 		}
@@ -470,19 +476,19 @@ namespace NaturalSortOrder
 		/*!> 現在の数字を表す */
 		long number;
 	}
-	/// <summary>漢数字を数値へ変換する機能を提供します。</summary>
+	/**
+	 * \brief 漢数字を数値へ変換する
+	 */
 	class KanjiNumberConverter : INumberComverter
 	{
-		/// <summary>インスタンスを初期化します。</summary>
-		/// <param name="number">１文字目の数字を表す char。</param>
-		public KanjiNumberConverter( char number)
+		public KanjiNumberConverter( char source)
 		{
 			length = 1;
 			
-			long temp = Parse( number);
+			long temp = Parse( source);
 			if( temp < 10)
 			{
-				this.number = temp;
+				number = temp;
 				unit1 = 9999;
 				unit2 = 99999999999999999;
 			}
@@ -508,83 +514,83 @@ namespace NaturalSortOrder
 		}
 		/**
 		 * \brief 数字を追加します
-		 * \param kanji [in] 数字を表す
+		 * \param source [in] 数字を表す
 		 * \return 追加結果。以下の値が返ります。
 		 * \retval true 数字として成立する場合に返ります。
 		 * \retval false 数字として成立しない場合に返ります。
 		 */
-		public bool AddChar( char kanji)
+		public bool AddChar( char source)
 		{
-			long value = Parse( kanji);
+			long parseValue = Parse( source);
 
 			/* 2文字目の内容で位取り記数法かどうかを決定する */
 			if( length == 1)
 			{
-				isNumeral = (number + value1 < 10 && value < 10);
-				if( isNumeral)
+				isNumeral = (number + value1 < 10 && parseValue < 10);
+				if( isNumeral != false)
 				{
 					value2 = number;
 					number = 0;
 				}
 			}
-			if( value < 0)
+			if( parseValue < 0)
 			{
 				return false;
 			}
 			if( isNumeral != false)
 			{
-				if( value > 10)
+				if( parseValue > 10)
 				{
 					return false;
 				}
 
-				value2 = value2 * 10 + value;
+				value2 = value2 * 10 + parseValue;
 				length++;
 				return true;
 			}
-			if( value < 10)
+			if( parseValue < 10)
 			{
 				/* 9以下の漢数字が連続したらエラー */
 				if( number > 0)
 				{
 					return false;
 				}
-				number = value;
+				number = parseValue;
 			}
-			else if( value <= 1000)
+			else if( parseValue <= 1000)
 			{
 				/* 前方より大きな単位が出現したらエラー */
-				if( unit1 <= value)
+				if( unit1 <= parseValue)
 				{
 					return false;
 				}
-				value1 += number * value;
+				value1 += number * parseValue;
 				number = 0;
-				unit1 = value;
+				unit1 = parseValue;
 			}
 			else
 			{
 				/* 前方より大きな単位が出現したらエラー */
-				if( unit2 <= value)
+				if( unit2 <= parseValue)
 				{
 					return false;
 				}
-				value2 += (value1 + number) * value;
+				value2 += (value1 + number) * parseValue;
 				value1 = number = 0;
 				unit1 = 9999;
-				unit2 = value;
+				unit2 = parseValue;
 			}
 			length++;
 			return true;
 		}
 		/**
 		 * \brief 漢数字を数値へ変換します
-		 * \param alpha [in] 漢数字
+		 * \param source [in] 漢数字
 		 * \return 漢数字が示す値が返ります。
 		 */
-		protected long Parse( char kanji)
+		protected long Parse( char source)
 		{
-			switch( kanji)
+			switch( source)
 			{
 				case '〇': return 0;
 				case '一': return 1;

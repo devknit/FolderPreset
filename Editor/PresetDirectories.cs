@@ -12,16 +12,15 @@ namespace FolderPreset
 		{
 			directories = new Element[]
 			{
-				new Element( "AnimatorControllers", false),
 				new Element( "Animations", false),
+				new Element( "AnimatorControllers", false),
 				new Element( "Materials", true),
 				new Element( "Models", false),
-				new Element( "Textures", true),
-				new Element( "Textures/Cube", true),
 				new Element( "Prefabs", true),
 				new Element( "Scripts", false),
 				new Element( "Scenes", false),
 				new Element( "Shaders", false),
+				new Element( "Textures", true),
 			};
 		}
 		public bool IsValid()
