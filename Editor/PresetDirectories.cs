@@ -14,6 +14,7 @@ namespace FolderPreset
 			{
 				new Element( "Animations", false),
 				new Element( "AnimatorControllers", false),
+				new Element( "AudioClips", false),
 				new Element( "Materials", true),
 				new Element( "Models", false),
 				new Element( "Prefabs", true),
@@ -21,6 +22,7 @@ namespace FolderPreset
 				new Element( "Scenes", false),
 				new Element( "Shaders", false),
 				new Element( "Textures", true),
+				new Element( "Timelines", false),
 			};
 		}
 		public bool IsValid()

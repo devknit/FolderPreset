@@ -17,17 +17,21 @@ MonoBehaviour:
     enabled: 0
   - name: AnimatorControllers
     enabled: 0
+  - name: AudioClips
+    enabled: 0
   - name: Materials
     enabled: 1
   - name: Models
     enabled: 0
   - name: Prefabs
     enabled: 1
-  - name: Scripts
-    enabled: 0
   - name: Scenes
+    enabled: 0
+  - name: Scripts
     enabled: 0
   - name: Shaders
     enabled: 0
   - name: Textures
     enabled: 1
+  - name: Timelines
+    enabled: 0
